@@ -1,4 +1,5 @@
 import requests
+from requests_toolbelt.utils import dump
 import json
 import pyjq
 import csv
@@ -6,14 +7,16 @@ import base64
 import getpass
 
 def JIRA_request(update_type, ticket, parameter):
-	url = "https://jira.atypon.com/rest/api/latest/" + ticket
-	if update_type = "comment":
+	url = "https://jira.atypon.com/rest/api/latest/issue/" + ticket
+	if update_type == "comment":
 		url += "/comment"
-		d = {"body": parameter}
-	elif update_type = "assign":
+		d = {"body":str(parameter)}
+		r = requests.post(url, headers = header, data = json.dumps(d))
+	elif update_type == "assign":
 		url += "/assignee"
-		d = {"name": parameter}
-	r = requests.get(url, headers = header, data = d)
+		d = {"name":str(parameter)}
+		r = requests.put(url, headers = header, data = json.dumps(d))
+	
 	request_text = dump.dump_all(r)
 	print(request_text)
 
@@ -27,7 +30,7 @@ header = {"Content-Type":"application/json", "Authorization":auth}
 #initiate
 with open('tickets.csv') as csv_file:
 	fieldnames = ['type', 'ticket', 'parameter']
-    csv_reader = csv.DictReader(csv_file, delimiter=',')
-    	for row in csv_reader:
-    			print(row['ticket'])
-    			JIRA_request(row["type"], row['ticket'], row["parameter"])
+	csv_reader = csv.DictReader(csv_file, fieldnames=fieldnames)
+	for row in csv_reader:
+			print(row['ticket'])
+			JIRA_request(row["type"], row['ticket'], row["parameter"])
