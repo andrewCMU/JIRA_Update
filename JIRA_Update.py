@@ -28,9 +28,9 @@ auth = "Basic " + base64.b64encode(password.encode("utf-8")).decode('ascii')
 header = {"Content-Type":"application/json", "Authorization":auth}
 
 #initiate
-with open('tickets.csv') as csv_file:
+with open('tickets.tsv') as tsv_file:
 	fieldnames = ['type', 'ticket', 'parameter']
-	csv_reader = csv.DictReader(csv_file, fieldnames=fieldnames)
-	for row in csv_reader:
+	tsv_reader = csv.DictReader(tsv_file, dialect='excel-tab', fieldnames=fieldnames)
+	for row in tsv_reader:
 			print(row['ticket'])
 			JIRA_request(row["type"], row['ticket'], row["parameter"])
