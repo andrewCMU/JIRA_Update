@@ -19,13 +19,38 @@ def assign(update_type, ticket, parameter):
 	r = requests.put(url, headers = header, data = json.dumps(d))
 	response(r)
 
+def resolve(update_type, ticket, parameter):
+	resolution = get_resolution(parameter)
+	if resolution == "Invalid":
+		print("Invalid Resolution, no update to be preformed")
+		pass
+	url = base_url + ticket + "/transitions"
+	d = {"fields": {"resolution": {"name": resolution}},"transition": {"id": "5"}}
+	r = requests.post(url, headers = header, data = json.dumps(d))
+	response(r)
+
+def close(update_type, ticket, parameter):
+	resolution = get_resolution(parameter)
+	if resolution == "Invalid":
+		print("Invalid Resolution, no update to be preformed")
+		pass
+	url = base_url + ticket + "/transitions"
+	d = {"fields": {"resolution": {"name": resolution}},"transition": {"id": "2"}}
+	r = requests.post(url, headers = header, data = json.dumps(d))
+	response(r)
+
 def response(r):
 	#print(r.content)
 	if(pattern.match(str(r.status_code))):
 		print("Succesfull Update")
 	else:
 		print("Failed Update: Error " + str(r.status_code))
-	pass
+
+def get_resolution(text):
+	resolutions = ["Fixed","Won't Fix","Duplicate","Incomplete","Cannot Reproduce","Invalid","Later","Remind","Moved","Done","Wrongly Reopened","Won't Do"]
+	res_lower = [item.lower() for item in resolutions]
+	res_index = res_lower.index(text.lower())
+	return resolutions[res_index]
 
 # Collect User Input
 print("Welcome to the JIRA Update Ticket. Please ensure you are connected to your VPN before continuing")
@@ -47,5 +72,9 @@ with open('tickets.tsv') as tsv_file:
 				comment(row["type"], row['ticket'], row["parameter"])
 			elif (row["type"] == "assign"):
 				assign(row["type"], row['ticket'], row["parameter"])
+			elif (row["type"] == "resolve"):
+				resolve(row["type"], row['ticket'], row["parameter"])
+			elif (row["type"] == "close"):
+				close(row["type"], row['ticket'], row["parameter"])
 			else:
 				print("Invalid Update Type")
