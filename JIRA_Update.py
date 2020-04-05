@@ -35,7 +35,7 @@ def close(update_type, ticket, parameter):
 		print("Invalid Resolution, no update to be preformed")
 		pass
 	url = base_url + ticket + "/transitions"
-	d = {"fields": {"resolution": {"name": resolution}},"transition": {"id": "2"}}
+	d = {"fields": {"resolution": {"name": resolution}},"transition": {"id": "702"}}
 	r = requests.post(url, headers = header, data = json.dumps(d))
 	response(r)
 
@@ -45,6 +45,7 @@ def response(r):
 		print("Succesfull Update")
 	else:
 		print("Failed Update: Error " + str(r.status_code))
+		print(r.json())
 
 def get_resolution(text):
 	resolutions = ["Fixed","Won't Fix","Duplicate","Incomplete","Cannot Reproduce","Invalid","Later","Remind","Moved","Done","Wrongly Reopened","Won't Do"]
@@ -54,7 +55,10 @@ def get_resolution(text):
 
 # Collect User Input
 print("Welcome to the JIRA Update Ticket. Please ensure you are connected to your VPN before continuing")
-password = getpass.getpass(prompt="Enter your JIRA credentials (username:password): ")
+# Password input can be done in a variety of ways. Comment out the keyring lines uncomment the getpass lines to enter the password manually each time.
+username = "aschwartz"
+password =  keyring.get_password("Python_JIRA","aschwartz")
+#password = getpass.getpass(prompt="Enter  your JIRA credentials (username:password): ")
 auth = "Basic " + base64.b64encode(password.encode("utf-8")).decode('ascii')
 
 #Static Data
@@ -74,7 +78,7 @@ with open('tickets.tsv') as tsv_file:
 				assign(row["type"], row['ticket'], row["parameter"])
 			elif (row["type"] == "resolve"):
 				resolve(row["type"], row['ticket'], row["parameter"])
-			elif (row["type"] == "close"):
-				close(row["type"], row['ticket'], row["parameter"])
+			#elif (row["type"] == "close"):
+			#	close(row["type"], row['ticket'], row["parameter"])
 			else:
 				print("Invalid Update Type")
