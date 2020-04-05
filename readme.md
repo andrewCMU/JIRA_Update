@@ -36,3 +36,8 @@ You must enter one of the following resolution types in order for the program to
 - Done
 - Wrongly Reopened
 - Won't Do
+
+## Passwords (Keyring)
+
+Passwords are retrieved through keyring, and must be set through the command line first. You can comment those lines out and uncomment the getpass lines to enter your JIRA username and password manually
+
