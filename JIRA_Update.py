@@ -6,20 +6,22 @@ import csv
 import base64
 import getpass
 import re
+import keyring
+import sys
 
-def comment(update_type, ticket, parameter):
+def comment(ticket, parameter):
 	url = base_url + ticket + "/comment"
 	d = {"body":str(parameter)}
 	r = requests.post(url, headers = header, data = json.dumps(d))
 	response(r)
 
-def assign(update_type, ticket, parameter):
+def assign(ticket, parameter):
 	url = base_url + ticket + "/assignee"
 	d = {"name":str(parameter)}
 	r = requests.put(url, headers = header, data = json.dumps(d))
 	response(r)
 
-def resolve(update_type, ticket, parameter):
+def resolve(ticket, parameter):
 	resolution = get_resolution(parameter)
 	if resolution == "Invalid":
 		print("Invalid Resolution, no update to be preformed")
@@ -29,7 +31,7 @@ def resolve(update_type, ticket, parameter):
 	r = requests.post(url, headers = header, data = json.dumps(d))
 	response(r)
 
-def close(update_type, ticket, parameter):
+def close(ticket, parameter):
 	resolution = get_resolution(parameter)
 	if resolution == "Invalid":
 		print("Invalid Resolution, no update to be preformed")
@@ -42,7 +44,7 @@ def close(update_type, ticket, parameter):
 def response(r):
 	#print(r.content)
 	if(pattern.match(str(r.status_code))):
-		print("Succesfull Update")
+		print("Status " + str(r.status_code) + " Succesfull Update")
 	else:
 		print("Failed Update: Error " + str(r.status_code))
 		print(r.json())
@@ -58,8 +60,9 @@ print("Welcome to the JIRA Update Ticket. Please ensure you are connected to you
 # Password input can be done in a variety of ways. Comment out the keyring lines uncomment the getpass lines to enter the password manually each time.
 username = "aschwartz"
 password =  keyring.get_password("Python_JIRA","aschwartz")
+auth = "Basic " + base64.b64encode((username + ":" +password).encode("utf-8")).decode('ascii')
 #password = getpass.getpass(prompt="Enter  your JIRA credentials (username:password): ")
-auth = "Basic " + base64.b64encode(password.encode("utf-8")).decode('ascii')
+#auth = "Basic " + base64.b64encode(password.encode("utf-8")).decode('ascii')
 
 #Static Data
 header = {"Content-Type":"application/json", "Authorization":auth}
@@ -73,12 +76,12 @@ with open('tickets.tsv') as tsv_file:
 	for row in tsv_reader:
 			print("****\n" +row['ticket'])
 			if (row["type"] == "comment"):
-				comment(row["type"], row['ticket'], row["parameter"])
+				comment(row['ticket'], row["parameter"])
 			elif (row["type"] == "assign"):
-				assign(row["type"], row['ticket'], row["parameter"])
+				assign(, row['ticket'], row["parameter"])
 			elif (row["type"] == "resolve"):
-				resolve(row["type"], row['ticket'], row["parameter"])
-			#elif (row["type"] == "close"):
-			#	close(row["type"], row['ticket'], row["parameter"])
+				resolve(, row['ticket'], row["parameter"])
+			elif (row["type"] == "close"):
+				close(row["type"], row['ticket'], row["parameter"])
 			else:
 				print("Invalid Update Type")
